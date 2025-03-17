@@ -52,7 +52,7 @@ const CovidData: React.FC = () => {
     <div className="space-y-6">
       <button
         onClick={() => setIsModalOpen(true)}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
+        className="px-4 w-40 py-2 bg-gradient-to-r from-blue-700 to-cyan-500 text-white rounded hover:from-blue-800 hover:to-cyan-600 cursor-pointer"
       >
         Select Charts
       </button>
@@ -107,13 +107,13 @@ const CovidData: React.FC = () => {
               <div className="mt-4 flex justify-end space-x-2">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 text-black rounded"
+                  className="px-4 py-2 bg-gray-300 text-black rounded cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={applySelection}
-                  className="px-4 py-2 bg-blue-500 text-white rounded"
+                  className="px-4 w-23 py-2 bg-gradient-to-r from-blue-700 to-cyan-500 text-white rounded hover:from-blue-800 hover:to-cyan-600 cursor-pointer"
                 >
                   Apply
                 </button>

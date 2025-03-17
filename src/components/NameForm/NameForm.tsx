@@ -1,85 +1,252 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { FaSearch } from "react-icons/fa";
+import Lottie from "lottie-react";
+import {
+  GenderData,
+  NationalityData,
+  AgeData,
+  SavedCard,
+} from "../../types/nameForm";
+
+// Images
+import boyYoung from "../../assets/NameFormUserPhotos/boy_young.png";
+import boyMiddle from "../../assets/NameFormUserPhotos/boy_medium.png";
+import boyOld from "../../assets/NameFormUserPhotos/boy_old.png";
+import girlYoung from "../../assets/NameFormUserPhotos/Girl_young.png";
+import girlMiddle from "../../assets/NameFormUserPhotos/girl_medium.png";
+import girlOld from "../../assets/NameFormUserPhotos/Girl_old.png";
+
+// Lottie JSON
+import loadingAnimation from "../../assets/lottie/Animation - 1742231455916.json";
 
 const NameForm: React.FC = () => {
-  const [name, setName] = useState("");
-  const [gender, setGender] = useState<any>(null);
-  const [nationality, setNationality] = useState<any>(null);
-  const [age, setAge] = useState<any>(null);
+  // State for user input and API results
+  const [name, setName] = useState<string>("");
+  const [gender, setGender] = useState<GenderData | null>(null);
+  const [nationality, setNationality] = useState<NationalityData | null>(null);
+  const [age, setAge] = useState<AgeData | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const genderResponse = await axios.get(
-        `http://localhost:3200/api/genderize/${name}`
-      );
-      setGender(genderResponse.data);
-      console.log("genderResponse:", genderResponse.data);
+  // UI state
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [savedCards, setSavedCards] = useState<SavedCard[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-      const nationalityResponse = await axios.get(
-        `http://localhost:3200/api/nationalize/${name}`
-      );
+  // Load saved cards on mount
+  useEffect(() => {
+    const storedCards = localStorage.getItem("savedCards");
+    if (storedCards) {
+      const parsed: SavedCard[] = JSON.parse(storedCards);
+      setSavedCards(parsed);
+    }
+  }, []);
 
-      console.log("nationalityResponse", nationalityResponse);
+  // Capitalize first letter of each word in the name
+  const capitalizeName = (name: string) => {
+    return name
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
 
-      setNationality(nationalityResponse.data);
-
-      const ageResponse = await axios.get(
-        `http://localhost:3200/api/agify/${name}`
-      );
-      console.log("ageResponse", ageResponse);
-
-      setAge(ageResponse.data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+  const getProfileImage = (ageValue: number, genderValue: string) => {
+    const genderLower = genderValue?.toLowerCase();
+    if (genderLower === "female") {
+      if (ageValue < 18) return girlYoung;
+      if (ageValue < 50) return girlMiddle;
+      return girlOld;
+    } else {
+      if (ageValue < 18) return boyYoung;
+      if (ageValue < 50) return boyMiddle;
+      return boyOld;
     }
   };
 
+  // Fetch gender, nationality, and age data for the given name
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const genderRes = await axios.get<GenderData>(
+        `http://localhost:3200/api/genderize/${name}`
+      );
+      const nationalityRes = await axios.get<NationalityData>(
+        `http://localhost:3200/api/nationalize/${name}`
+      );
+      const ageRes = await axios.get<AgeData>(
+        `http://localhost:3200/api/agify/${name}`
+      );
+
+      setGender(genderRes.data);
+      setNationality(nationalityRes.data);
+      setAge(ageRes.data);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Save current prediction to localStorage
+  const saveCard = () => {
+    if (!gender || !nationality || !age) return;
+    const newCard: SavedCard = { name, gender, nationality, age };
+    const updatedCards = [...savedCards, newCard];
+    localStorage.setItem("savedCards", JSON.stringify(updatedCards));
+    setSavedCards(updatedCards);
+    setIsModalOpen(false);
+    setName("");
+  };
+
+  const deleteCard = (index: number) => {
+    const updatedCards = savedCards.filter((_, i) => i !== index);
+    localStorage.setItem("savedCards", JSON.stringify(updatedCards));
+    setSavedCards(updatedCards);
+  };
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Name Information</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter your name"
-          className="p-2 border rounded w-full"
-        />
-        <button type="submit" className="p-2 bg-blue-500 text-white rounded">
-          Submit
-        </button>
-      </form>
+    <div>
+      <div className="h-90 bg-gray-50 px-4 py-8 flex justify-center items-center">
+        {/* 🔍 Search Section */}
+        <div className="w-full max-w-2xl flex flex-col items-center">
+          <h1 className="text-4xl font-bold text-gray-800 text-center mb-8">
+            Predictions Based On Name
+          </h1>
 
-      {gender && (
-        <div className="mt-4">
-          <h2 className="text-xl font-bold">Gender: {gender.gender}</h2>
-          <p>Probability: {gender.probability}</p>
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center space-x-2 shadow-lg rounded-lg bg-white p-2"
+          >
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Last or full name"
+              className="px-4 py-2 outline-none w-72 text-gray-700"
+            />
+            <button
+              type="submit"
+              className="p-3 rounded-lg bg-gradient-to-r from-blue-700 to-cyan-500 text-white hover:from-blue-800 hover:to-cyan-600 cursor-pointer flex items-center justify-center"
+              disabled={isLoading || !name.trim()}
+            >
+              {isLoading ? (
+                <Lottie
+                  animationData={loadingAnimation}
+                  className="w-4 h-4 filter invert sepia hue-rotate-45"
+                />
+              ) : (
+                <FaSearch />
+              )}
+            </button>
+          </form>
         </div>
-      )}
 
-      {nationality && (
-        <div className="mt-4">
-          <h2 className="text-xl font-bold">Nationality:</h2>
-          <ul>
-            {nationality.country.map((country: any) => (
-              <li
-                key={country.country_id}
-                className="flex items-center space-x-2"
+        {/* Modal Popup */}
+        {isModalOpen && gender && nationality && age && (
+          <div className="fixed inset-0 flex items-center justify-center bg-[rgba(0,0,0,0.5)] z-50">
+            <div className="bg-white rounded-xl flex p-4 w-[900px] relative justify-evenly items-center">
+              <img
+                src={getProfileImage(age.age, gender.gender)}
+                alt="Profile"
+                className="w-40 h-full object-cover rounded-l-xl"
+              />
+              <div className="p-6 flex-col">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="absolute top-2 right-3 text-gray-500 hover:text-gray-700 text-xl font-bold cursor-pointer"
+                >
+                  ×
+                </button>
+                <h2 className="text-xl font-bold text-gray-800 mb-2">
+                  {capitalizeName(name)}
+                </h2>
+                <p className="text-gray-600">
+                  Gender: {gender.gender} (
+                  {(gender.probability * 100).toFixed(1)}%)
+                </p>
+                <p className="text-gray-600">Age: {age.age} years</p>
+                <div className="mt-2">
+                  <h3 className="font-semibold text-gray-700">Nationality:</h3>
+                  <ul className="text-gray-600 text-sm space-y-1">
+                    {nationality.country.map((country) => (
+                      <li
+                        key={country.country_id}
+                        className="flex items-center space-x-2"
+                      >
+                        <img
+                          src={`https://flagcdn.com/w40/${country.country_id.toLowerCase()}.png`}
+                          alt={country.country_id}
+                          className="w-6 h-4 object-cover rounded"
+                        />
+                        <span>{country.country_id}</span>
+                        <span>{(country.probability * 100).toFixed(1)}%</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <button
+                  onClick={saveCard}
+                  className="mt-4 px-4 py-2 rounded bg-gradient-to-r from-blue-700 to-cyan-500 text-white hover:from-blue-800 hover:to-cyan-600 cursor-pointer"
+                >
+                  Save Card
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Saved Cards Section */}
+      <div className="w-full h-full mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {savedCards.map((card, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-xl shadow-lg flex p-4 justify-center items-center gap-30"
+          >
+            <img
+              src={getProfileImage(card.age.age, card.gender.gender)}
+              alt="Profile"
+              className="w-25 h-full object-contain m-5"
+            />
+            <div className="p-4 flex-1">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">
+                {capitalizeName(card.name)}
+              </h2>
+              <p className="text-gray-600">
+                Gender: {card.gender.gender} (
+                {(card.gender.probability * 100).toFixed(1)}%)
+              </p>
+              <p className="text-gray-600">Age: {card.age.age} years</p>
+              <div className="mt-2">
+                <h3 className="font-semibold text-gray-700">Nationality:</h3>
+                <ul className="text-gray-600 text-sm space-y-1">
+                  {card.nationality.country.map((country) => (
+                    <li
+                      key={country.country_id}
+                      className="flex items-center space-x-2"
+                    >
+                      <img
+                        src={`https://flagcdn.com/w40/${country.country_id.toLowerCase()}.png`}
+                        alt={country.country_id}
+                        className="w-6 h-4 object-cover rounded"
+                      />
+                      <span>{country.country_id}</span>
+                      <span>{(country.probability * 100).toFixed(1)}%</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button
+                onClick={() => deleteCard(index)}
+                className="mt-4 px-4 py-2 rounded bg-gradient-to-r from-red-700 to-red-400 text-white hover:from-red-400 hover:to-red-700 cursor-pointer"
               >
-                <span>{country.country_id}</span>
-                <span>{country.probability}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {age && (
-        <div className="mt-4">
-          <h2 className="text-xl font-bold">Age: {age.age}</h2>
-        </div>
-      )}
+                Delete Card
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

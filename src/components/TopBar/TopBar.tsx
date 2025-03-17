@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation } from "react-router-dom";
 
 const TopBar: React.FC = () => {
@@ -13,8 +12,8 @@ const TopBar: React.FC = () => {
       : "Dcycle Homework"; // Default title
 
   return (
-    <header className="h-26 bg-gray-100 border-b-4 border-gray-300 flex items-center justify-between px-4 ml-9">
-      <h1 className="text-xl font-bold text-gray-800 ">{pageTitle}</h1>
+    <header className="h-30 bg-gray-100 border-b-4 border-gray-300 flex items-center justify-between px-4 ml-9">
+      <h1 className="text-3xl font-bold text-gray-800 ml-0">{pageTitle}</h1>
     </header>
   );
 };

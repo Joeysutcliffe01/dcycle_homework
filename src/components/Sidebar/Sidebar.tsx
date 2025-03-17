@@ -1,4 +1,3 @@
-import React from "react";
 import { NavLink } from "react-router-dom";
 import Logo from "../../assets/Logos/dcycle_logo_croped.png";
 import { FaViruses } from "react-icons/fa6";

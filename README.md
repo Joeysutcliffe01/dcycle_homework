@@ -31,6 +31,13 @@ The app includes a **sidebar navigation**, with **COVID Data** as the default vi
 
 ---
 
+## 🌐 Live Demo
+
+Check out the live version here:  
+➡️ **[https://dcycle-homework.onrender.com/covid-data](https://dcycle-homework.onrender.com/covid-data)**
+
+---
+
 ## Technology Stack
 
 - **Frontend:**

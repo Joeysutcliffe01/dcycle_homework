@@ -8,6 +8,7 @@ import {
   AgeData,
   SavedCard,
 } from "../../types/nameForm";
+import { API_BASE_URL } from "../../config";
 
 // Images
 import boyYoung from "../../assets/NameFormUserPhotos/boy_young.png";
@@ -68,13 +69,13 @@ const NameForm: React.FC = () => {
     setIsLoading(true);
     try {
       const genderRes = await axios.get<GenderData>(
-        `http://localhost:3200/api/genderize/${name}`
+        `${API_BASE_URL}/api/genderize/${name}`
       );
       const nationalityRes = await axios.get<NationalityData>(
-        `http://localhost:3200/api/nationalize/${name}`
+        `${API_BASE_URL}/api/nationalize/${name}`
       );
       const ageRes = await axios.get<AgeData>(
-        `http://localhost:3200/api/agify/${name}`
+        `${API_BASE_URL}/api/agify/${name}`
       );
 
       setGender(genderRes.data);

@@ -5,6 +5,7 @@ import ChartControls from "./ChartControls";
 import { CovidChart } from "../Charts";
 import { ChartType } from "../../types/chart";
 import { CovidEntry, FormattedCovidData } from "../../types/covid";
+import { API_BASE_URL } from "../../config";
 
 // Lottie Animation
 import Lottie from "lottie-react";
@@ -33,7 +34,7 @@ const CovidData: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3200/api/covid/historical"
+          `${API_BASE_URL}/api/covid/historical`
         );
         setCovidData(response.data.data);
       } catch (error) {

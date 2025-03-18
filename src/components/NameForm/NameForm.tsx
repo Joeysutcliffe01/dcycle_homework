@@ -13,9 +13,9 @@ import { API_BASE_URL } from "../../config";
 import boyYoung from "../../assets/NameFormUserPhotos/boy_young.png";
 import boyMiddle from "../../assets/NameFormUserPhotos/boy_medium.png";
 import boyOld from "../../assets/NameFormUserPhotos/boy_old.png";
-import girlYoung from "../../assets/NameFormUserPhotos/Girl_young.png";
+import girlYoung from "../../assets/NameFormUserPhotos/girl_young.png";
 import girlMiddle from "../../assets/NameFormUserPhotos/girl_medium.png";
-import girlOld from "../../assets/NameFormUserPhotos/Girl_old.png";
+import girlOld from "../../assets/NameFormUserPhotos/girl_old.png";
 
 // Lottie JSON
 import Lottie from "lottie-react";

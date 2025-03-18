@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaSearch } from "react-icons/fa";
-import Lottie from "lottie-react";
 import {
   GenderData,
   NationalityData,
@@ -19,7 +18,8 @@ import girlMiddle from "../../assets/NameFormUserPhotos/girl_medium.png";
 import girlOld from "../../assets/NameFormUserPhotos/Girl_old.png";
 
 // Lottie JSON
-import loadingAnimation from "../../assets/lottie/Animation - 1742231455916.json";
+import Lottie from "lottie-react";
+import loadingAnimation from "../../assets/Lottie/lottie_search_loading.json";
 
 const NameForm: React.FC = () => {
   // State for user input and API results

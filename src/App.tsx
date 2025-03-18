@@ -1,19 +1,19 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import DashboardLayout from "./components/Dashboard";
+import Layout from "./components/Layout"; // updated import
 import NameForm from "./components/NameForm";
 import CovidData from "./components/CovidData";
 
 const App: React.FC = () => {
   return (
     <Router>
-      <DashboardLayout>
+      <Layout>
         <Routes>
           <Route path="/name-info" element={<NameForm />} />
           <Route path="/covid-data" element={<CovidData />} />
           <Route path="/" element={<CovidData />} />
         </Routes>
-      </DashboardLayout>
+      </Layout>
     </Router>
   );
 };

@@ -1,24 +1,34 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import axios from "axios";
-import { CovidLineChart, CovidBarChart, CovidAreaChart } from "../Charts";
-import { CovidEntry } from "../../types/covid";
+import html2canvas from "html2canvas";
+import ChartControls from "./ChartControls";
+import { CovidChart } from "../Charts";
+import { ChartType } from "../../types/chart";
+import { CovidEntry, FormattedCovidData } from "../../types/covid";
 
-interface ChartSelection {
-  line: boolean;
-  bar: boolean;
-  area: boolean;
-}
+// Lottie Animation
+import Lottie from "lottie-react";
+import covidLottie from "../../assets/Lottie/lottie_covid.json";
 
 const CovidData: React.FC = () => {
+  // Raw COVID data from API
   const [covidData, setCovidData] = useState<CovidEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [chartSelection, setChartSelection] = useState<ChartSelection>({
-    line: true,
-    bar: true,
-    area: false,
-  });
 
+  // Chart type selection state
+  const [chartTypes, setChartTypes] = useState<{
+    total: ChartType;
+    daily: ChartType;
+  }>({ total: "line", daily: "bar" });
+
+  // Toggle 7-day moving average and date range selector
+  const [showMovingAvg, setShowMovingAvg] = useState(true);
+  const [dateRange, setDateRange] = useState(90); // default: last 90 days
+
+  // Ref for downloading charts as an image
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  // Fetch COVID-19 historical data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,96 +42,143 @@ const CovidData: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (!covidData.length) return <div>No data available</div>;
+  // Format data for charts and calculate 7-day moving averages
+  const formatData: FormattedCovidData[] = useMemo(() => {
+    return covidData
+      .map((entry, i, arr) => {
+        // Helper to calculate N-day moving average for any metric
+        const avg = (getter: (e: CovidEntry) => number, days: number) => {
+          const slice = arr.slice(i, i + days);
+          const sum = slice.reduce((acc, curr) => acc + getter(curr), 0);
+          return Math.round(sum / days);
+        };
 
-  const toggleCheckbox = (chart: keyof ChartSelection) => {
-    setChartSelection((prev) => ({ ...prev, [chart]: !prev[chart] }));
+        return {
+          date: entry.date,
+          totalCases: entry.cases?.total?.value || 0,
+          newCases: entry.cases?.total?.calculated?.change_from_prior_day || 0,
+          avgNewCases: avg(
+            (e) => e.cases?.total?.calculated?.change_from_prior_day || 0,
+            7
+          ),
+          totalTests: entry.testing?.total?.value || 0,
+          newTests:
+            entry.testing?.total?.calculated?.change_from_prior_day || 0,
+          avgNewTests: avg(
+            (e) => e.testing?.total?.calculated?.change_from_prior_day || 0,
+            7
+          ),
+          totalDeaths: entry.outcomes?.death?.total?.value || 0,
+          newDeaths:
+            entry.outcomes?.death?.total?.calculated?.change_from_prior_day ||
+            0,
+          avgNewDeaths: avg(
+            (e) =>
+              e.outcomes?.death?.total?.calculated?.change_from_prior_day || 0,
+            7
+          ),
+        };
+      })
+      .slice(0, dateRange)
+      .reverse(); // latest dates first
+  }, [covidData, dateRange]);
+
+  // Export charts as a PNG
+  const downloadChart = async () => {
+    if (!chartRef.current) return;
+    const canvas = await html2canvas(chartRef.current, {
+      backgroundColor: "#ffffff", // ensures white background
+      scale: 2, // higher resolution
+      useCORS: true,
+    });
+    const link = document.createElement("a");
+    link.download = "covid_chart.png";
+    link.href = canvas.toDataURL();
+    link.click();
   };
 
-  const applySelection = () => {
-    // Simply close the modal since state is already updated via checkboxes.
-    setIsModalOpen(false);
-  };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[80vh]">
+        <Lottie
+          animationData={covidLottie}
+          loop
+          autoplay
+          style={{ width: 300, height: 300 }}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="px-4 w-40 py-2 bg-gradient-to-r from-blue-700 to-cyan-500 text-white rounded hover:from-blue-800 hover:to-cyan-600 cursor-pointer"
-      >
-        Select Charts
-      </button>
+    <div className="space-y-4">
+      {/* Controls for chart settings and download */}
+      <ChartControls
+        chartTypes={chartTypes}
+        setChartTypes={setChartTypes}
+        dateRange={dateRange}
+        setDateRange={setDateRange}
+        showMovingAvg={showMovingAvg}
+        setShowMovingAvg={setShowMovingAvg}
+        downloadChart={downloadChart}
+      />
 
-      {chartSelection.line && <CovidLineChart data={covidData} />}
-      {chartSelection.bar && <CovidBarChart data={covidData} />}
-      {chartSelection.area && <CovidAreaChart data={covidData} />}
+      {/* Render charts and wrap for export */}
+      <div ref={chartRef} className="space-y-4">
+        {/* Total Metrics Chart */}
+        <CovidChart
+          type={chartTypes.total}
+          data={formatData}
+          title="Total Metrics Over Time"
+          dataKeys={[
+            { key: "totalCases", color: "#8884d8", label: "Total Cases" },
+            { key: "totalTests", color: "#82ca9d", label: "Total Tests" },
+            { key: "totalDeaths", color: "#ffc658", label: "Total Deaths" },
+          ]}
+        />
 
-      {/* Modal Popup */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen">
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 bg-black opacity-50"
-              onClick={() => setIsModalOpen(false)}
-            ></div>
-            {/* Modal Content */}
-            <div className="bg-white rounded-lg shadow-lg z-20 p-6 w-96">
-              <h2 className="text-xl font-bold mb-4">
-                Select Charts to Display
-              </h2>
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={chartSelection.line}
-                    onChange={() => toggleCheckbox("line")}
-                    className="mr-2"
-                  />
-                  Line Chart
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={chartSelection.bar}
-                    onChange={() => toggleCheckbox("bar")}
-                    className="mr-2"
-                  />
-                  Bar Chart
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={chartSelection.area}
-                    onChange={() => toggleCheckbox("area")}
-                    className="mr-2"
-                  />
-                  Area Chart
-                </label>
-              </div>
-              <div className="mt-4 flex justify-end space-x-2">
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 text-black rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={applySelection}
-                  className="px-4 w-23 py-2 bg-gradient-to-r from-blue-700 to-cyan-500 text-white rounded hover:from-blue-800 hover:to-cyan-600 cursor-pointer"
-                >
-                  Apply
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        {/* Daily Metrics Chart with optional 7-day averages */}
+        <CovidChart
+          type={chartTypes.daily}
+          data={formatData}
+          title="New Metrics Per Day"
+          dataKeys={[
+            { key: "newCases", color: "#ff7300", label: "New Cases" },
+            ...(showMovingAvg
+              ? [
+                  {
+                    key: "avgNewCases",
+                    color: "#1e90ff",
+                    label: "7-Day Avg Cases",
+                  },
+                ]
+              : []),
+            { key: "newTests", color: "#00c49f", label: "New Tests" },
+            ...(showMovingAvg
+              ? [
+                  {
+                    key: "avgNewTests",
+                    color: "#8a2be2",
+                    label: "7-Day Avg Tests",
+                  },
+                ]
+              : []),
+            { key: "newDeaths", color: "#ff0000", label: "New Deaths" },
+            ...(showMovingAvg
+              ? [
+                  {
+                    key: "avgNewDeaths",
+                    color: "#6a5acd",
+                    label: "7-Day Avg Deaths",
+                  },
+                ]
+              : []),
+          ]}
+        />
+      </div>
     </div>
   );
 };

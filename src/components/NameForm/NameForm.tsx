@@ -198,11 +198,11 @@ const NameForm: React.FC = () => {
       </div>
 
       {/* Saved Cards Section */}
-      <div className="w-full h-full mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="w-full h-full mt-10 flex flex-wrap gap-6 justify-center">
         {savedCards.map((card, index) => (
           <div
             key={index}
-            className="bg-white rounded-xl shadow-lg flex p-4 justify-center items-center gap-30"
+            className="bg-white rounded-xl shadow-lg flex p-4 justify-center items-center gap-30 w-117"
           >
             <img
               src={getProfileImage(card.age.age, card.gender.gender)}

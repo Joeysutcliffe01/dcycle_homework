@@ -1,11 +1,12 @@
 import React from "react";
-import Sidebar from "../Sidebar/Sidebar";
-import TopBar from "../TopBar/TopBar";
+import Sidebar from "../Sidebar";
+import TopBar from "../TopBar";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
+// Layout used for all pages with sidebar + topbar
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="flex min-h-screen bg-gray-100">

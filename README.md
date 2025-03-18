@@ -1,41 +1,60 @@
 # dcycle_homework
 
-A React + TypeScript project built with Vite and styled using Tailwind CSS. This project implements two exercises as part of a front-end homework assignment, integrating with a Node.js backend API for data retrieval.
+A React + TypeScript project built with **Vite** and styled using **Tailwind CSS**. This project implements two front-end exercises, integrating with a **Node.js/Express backend API** for data retrieval.
 
-## Project Overview
+---
+
+## 🚀 Project Overview
 
 This project demonstrates:
 
-- **Exercise 1: Name Information**
+### 1. **Name Information**
+- A form to enter a name and retrieve:
+  - The most likely **gender** (`/api/genderize/:name`)
+  - Probable **nationalities** (`/api/nationalize/:name`)
+  - Predicted **age** (`/api/agify/:name`)
+- Results are displayed in a clean, user-friendly UI.
+- Users can **save** and **delete** cards for multiple names.
 
-  - A form where the user can enter their name.
-  - API calls to fetch:
-    - The most likely gender (`/api/genderize/:name`)
-    - Probable nationalities (`/api/nationalize/:name`)
-    - The predicted age (`/api/agify/:name`)
-  - A clean, user-friendly display of the fetched data.
+### 2. **COVID Historical Data**
+- Fetches US COVID-19 data from `/api/covid/historical`.
+- Visualizes **total** and **daily metrics**:
+  - Cases, Tests, and Deaths
+- Features:
+  - Chart type toggle (Line, Bar, Area)
+  - 7-Day moving average toggle
+  - Date range selection (30, 90, 180 days)
+  - Download chart as PNG
+  - Lottie animation during loading
 
-- **Exercise 2: COVID Historical Data**
-  - Fetches historical COVID data for the United States from `/api/covid/historical`.
-  - Displays daily data on cases, tests, and deaths.
+The app includes a **sidebar navigation**, with **COVID Data** as the default view.
 
-A sidebar navigation allows users to switch between these two exercises. By default, the COVID Historical Data (Exercise 2) is displayed first.
+---
 
-## Technology Stack
+## 🛠 Technology Stack
 
-- **React** with **TypeScript** for building the UI.
-- **Vite** for fast development and build processes.
-- **Tailwind CSS** for utility-first styling.
-- **Node.js/Express** backend (provided via an external repository) running on port 3200 for API endpoints.
+- **Frontend:**
+  - React + TypeScript
+  - Vite
+  - Tailwind CSS
+  - Recharts (data visualization)
+  - html2canvas (chart export)
+  - react-tooltip (tooltips)
+  - Lottie (animations)
 
-## Setup & Installation
+- **Backend:**
+  - Node.js + Express API
+  - Runs on **port 3200** (external repo required)
 
-### 1. Frontend Setup
+---
 
-Clone the project repository and install dependencies:
+## ⚙️ Setup & Installation
+
+### 1. Clone the Frontend Repository
 
 ```bash
-git clone <your-frontend-repository-url>
+git clone https://github.com/Joeysutcliffe01/dcycle_homework.git
 cd dcycle_homework
 npm install
-```
+
+

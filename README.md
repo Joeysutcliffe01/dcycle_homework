@@ -4,7 +4,7 @@ A React + TypeScript project built with **Vite** and styled using **Tailwind CSS
 
 ---
 
-## 🚀 Project Overview
+## Project Overview
 
 This project demonstrates:
 
@@ -31,7 +31,7 @@ The app includes a **sidebar navigation**, with **COVID Data** as the default vi
 
 ---
 
-## 🛠 Technology Stack
+## Technology Stack
 
 - **Frontend:**
   - React + TypeScript
@@ -48,13 +48,13 @@ The app includes a **sidebar navigation**, with **COVID Data** as the default vi
 
 ---
 
-## ⚙️ Setup & Installation
-
-### 1. Clone the Frontend Repository
+### Clone the Frontend Repository
 
 ```bash
 git clone https://github.com/Joeysutcliffe01/dcycle_homework.git
 cd dcycle_homework
 npm install
+
+
 
 
